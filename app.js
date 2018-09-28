@@ -1,7 +1,11 @@
 import puppeteer from 'puppeteer';
 import path from 'path';
-const devices = require('puppeteer/DeviceDescriptors');
 const pathToExtension = path.join(__dirname, './chrome/chrome.exe');
+import {parseArticle, queryUrl} from './parse';
+import postModel from './models/post';
+require('./db/index');
+let url='https://www.instagram.com/puppy_lovings';
+
 (async () => {
   const browser = await puppeteer.launch({
     executablePath: pathToExtension,
@@ -9,29 +13,34 @@ const pathToExtension = path.join(__dirname, './chrome/chrome.exe');
     args: [ '--proxy-server=127.0.0.1:1080' ]
   });
   const page = await browser.newPage();
-  await page.goto('https://developers.google.com/web/');
+  await page.setViewport({width: 1000,height: 1000})
+  await page.goto(url,{waitUntil:'domcontentloaded'});
+  await page.waitFor(2500);
+  
+  await page.click('.v1Nh3.kIKUG._bz0w')
+  await page.waitFor(2500);
+  let postUrl=await queryUrl(page,0);
 
-  // Type into search box.
-  await page.type('#searchbox input', 'Headless Chrome');
+  let NEXT_CLASS='.HBoOv.coreSpriteRightPaginationArrow'
+  let nextNode=await page.$(NEXT_CLASS);
+  do{
+    let article=await parseArticle(page);
+    article.post_url=postUrl;
+    await postModel(article).save();
 
-  // Wait for suggest overlay to appear and click "show all results".
-  const allResultsSelector = '.devsite-suggest-all-results';
-  await page.waitForSelector(allResultsSelector);
-  await page.click(allResultsSelector);
+    postUrl=await queryUrl(page,1);
 
-  // Wait for the results page to load and display the results.
-  const resultsSelector = '.gsc-results .gsc-thumbnail-inside a.gs-title';
-  await page.waitForSelector(resultsSelector);
+    await page.click(NEXT_CLASS);
+    await page.waitFor(1000);
 
-  // Extract the results from the page.
-  const links = await page.evaluate(resultsSelector => {
-    const anchors = Array.from(document.querySelectorAll(resultsSelector));
-    return anchors.map(anchor => {
-      const title = anchor.textContent.split('|')[0].trim();
-      return `${title} - ${anchor.href}`;
-    });
-  }, resultsSelector);
-  console.log(links.join('\n'));
+    console.log('00000',postUrl)
+    nextNode=await page.$(NEXT_CLASS);
+  }while(nextNode)
 
-  await browser.close();
+
+
+
+
+  //await browser.close();
+
 })();
