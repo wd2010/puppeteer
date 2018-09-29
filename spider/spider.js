@@ -1,9 +1,9 @@
 import puppeteer from 'puppeteer';
 import path from 'path';
-const pathToExtension = path.join(__dirname, './chrome/chrome.exe');
+const pathToExtension = path.join(__dirname, '../chrome/chrome.exe');
 import {parseArticle, queryUrl} from './parse';
-import postModel from './models/post';
-require('./db/index');
+import postModel from '../models/post';
+require('../db/index');
 let url='https://www.instagram.com/puppy_lovings';
 
 (async () => {
@@ -23,17 +23,22 @@ let url='https://www.instagram.com/puppy_lovings';
 
   let NEXT_CLASS='.HBoOv.coreSpriteRightPaginationArrow'
   let nextNode=await page.$(NEXT_CLASS);
+
   do{
     let article=await parseArticle(page);
     article.post_url=postUrl;
     await postModel(article).save();
+    process.send({
+      url: postUrl,
+      img: article.img,
+      video: article.video,
+    });
 
     postUrl=await queryUrl(page,1);
 
     await page.click(NEXT_CLASS);
     await page.waitFor(1000);
 
-    console.log('00000',postUrl)
     nextNode=await page.$(NEXT_CLASS);
   }while(nextNode)
 
