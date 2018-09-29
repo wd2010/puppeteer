@@ -10,9 +10,10 @@ const download=cp.fork('./download/index.js')
 
 let start=true
 spider.on('message', data=>{
-  console.log(data)
+
   let filename=url.parse(data.url).pathname.split('/')[2];
   jsonfile.writeFileSync(path.join(__dirname,`temp/${filename}.json`),data);
+  console.log('11111111111',filename)
   download.send(filename)
 })
 
