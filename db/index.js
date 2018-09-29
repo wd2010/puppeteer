@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
 import chalk from 'chalk';
 
-const url='mongodb://localhost/puppeteer'
+const url='mongodb://localhost/demo'
+
 mongoose.connect(url,{ useNewUrlParser: true ,useCreateIndex: true,});
 
 const db = mongoose.connection;
