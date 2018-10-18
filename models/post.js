@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const postSchema=new Schema({
   id : { type: Number, index: true },
   post_url: { type: String, index: true },
-  img: String,
+  img: { type: String, index: true },
   video: String,
   likes: String,
   content: String,
