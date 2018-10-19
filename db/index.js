@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import chalk from 'chalk';
 
-const url='mongodb://localhost/demo'
+const url='mongodb://localhost/ins'
 
 mongoose.connect(url,{ useNewUrlParser: true ,useCreateIndex: true,});
 
