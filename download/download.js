@@ -13,7 +13,7 @@ let maxChunkLen= 20 * 1024 * 1024;//10M;
 const temp=path.join(__dirname,'../temp/');
 
 const get=async ({url,opt={}})=>{
-  let baseOpt={url,proxy: {host: '127.0.0.1', port: 1080}};
+  let baseOpt={url/*,proxy: {host: '127.0.0.1', port: 1080}*/};
   Object.assign(baseOpt,opt)
   return await new Promise((resolve,reject)=>{
     request.get(baseOpt).on('response',resolve).on('error',(err)=>reject(err));
@@ -68,7 +68,7 @@ const downloadImg=async(imgUrl,dirname)=>{
     let writeStream = fs.createWriteStream(filename);
     try{
       await new Promise((resolve,reject)=>{
-        request.get({url: imgUrl,proxy: {host: '127.0.0.1', port: 1080}})
+        request.get({url: imgUrl/*,proxy: {host: '127.0.0.1', port: 1080}*/})
           .on('end',resolve)
           .on('error',reject)
           .pipe(writeStream)

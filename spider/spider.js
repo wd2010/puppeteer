@@ -9,8 +9,8 @@ let url='https://www.instagram.com/puppy_lovings';
 (async () => {
   const browser = await puppeteer.launch({
     executablePath: pathToExtension,
-    headless: false,
-    args: [ '--proxy-server=127.0.0.1:1080' ]
+    //headless: false,
+    //args: [ '--proxy-server=127.0.0.1:1080' ]
   });
   const page = await browser.newPage();
   await page.setViewport({width: 1000,height: 1000})
