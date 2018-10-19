@@ -13,14 +13,10 @@ let maxChunkLen= 20 * 1024 * 1024;//10M;
 const temp=path.join(__dirname,'../temp/');
 
 const get=async ({url,opt={}})=>{
-  let baseOpt={
-    url,
-    proxy: {host: '127.0.0.1', port: 1080}
-  };
+  let baseOpt={url,proxy: {host: '127.0.0.1', port: 1080}};
   Object.assign(baseOpt,opt)
-  //let rq=request.defaults({proxy: 'http://127.0.0.1:8899'})
   return await new Promise((resolve,reject)=>{
-    request.get(baseOpt).on('response',resolve).on('error',reject);
+    request.get(baseOpt).on('response',resolve).on('error',(err)=>reject(err));
   })
 }
 
@@ -45,14 +41,22 @@ const baseDownloadVideo=async(total , max, filename, url)=>{
     let writeStream= fs.createWriteStream(filename);
     for(let i=0;i<n;i++){
       let opt={headers: { Range: `bytes= ${i*max} - ${(i+1)*max}`},Connection:'keep-alive' };
-      let resStream=await get({url,opt,type:'data'});
-      if(resStream){
-        ds.push(resStream)
-      }else{
-        ds.push(null)
+      console.log(opt.headers.Range)
+      //let rq=request.defaults({proxy: 'http://127.0.0.1:8899'});
+      try{
+        await new Promise((resolve,reject)=>{
+          request.get(url)
+            .on('response',response=>{
+              console.log('baseDownloadVideo',response.statusCode)
+            })
+            .pipe(writeStream)
+            .on('end',resolve)
+        })
+      }catch(err){
+        console.log(err)
       }
+
     }
-    ds.pipe(writeStream)
   }
 }
 
@@ -84,7 +88,7 @@ const downloadVideo=async (videoUrl, dirname)=>{
   if(isExist)return ;
 
   try{
-    let {headers}=await get({url:videoUrl});
+    let {headers}=await get({url:videoUrl,isProxy:false});
     let contentLength=headers['content-length']
     await baseDownloadVideo(contentLength , maxChunkLen, filename, videoUrl)
     console.log('下载视频成功：', videoUrl, filename)
@@ -115,6 +119,7 @@ const downloadMain=async ()=>{
     }
   }while(tempList.length>0);
   console.log('全部下载完成')
+  process.exit()
 }
 
 
